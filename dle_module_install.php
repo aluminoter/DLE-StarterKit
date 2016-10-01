@@ -11,9 +11,10 @@ include('dle_starter_installer/install.class.php');
  */
 $moduleName = (isset($_REQUEST['module'])) ? trim($_REQUEST['module']) : 'dle_starter';
 
-
+// Создаём новый экземпляр класса ecnfyjdobrf
 $installer = new dleStarterInstaller($moduleName);
 
+// Заголовки для показа внутри шагов уставноки
 $stepsHeadings = [
 	'paste' => 'Вставить код',
 	'find' => 'Найти код',
@@ -22,7 +23,8 @@ $stepsHeadings = [
 	'replace' => 'Заменить на',
 ];
 
-$contacts = '';
+// Сообщение в конце установки
+$dontForgetToDeleteInstaller = 'Не забудьте удалить с сервера файл <b>dle_module_install.php</b> и папку <b>dle_starter_installer</b>';
 
 try {
 	$installer->checkBeforeInstall();
@@ -155,27 +157,38 @@ HTML;
 			}
 		}
 
-		$output .= <<<HTML
-			<div class="form-field clearfix">
-				<form method="POST">
-					<input type="hidden" name="install" value="y">
-					<input type="hidden" name="accept" value="y">
-					<button class="btn btn-blue" type="submit">Установить модуль</button>
-					{$queriesBtn}
-				</form>
-			</div>
-			<div class="queries hide">
-				<div class="content col-margin-top">
-					{$queriesTxt}
+		// Если необходимо выполнить запросы - показываем кнопку установки
+		if ((is_array($queries) && count($queries)) || $installer->cfg['installAdmin']) {
+			$output .= <<<HTML
+				<div class="form-field clearfix">
+					<form method="POST">
+						<input type="hidden" name="install" value="y">
+						<input type="hidden" name="accept" value="y">
+						<button class="btn btn-blue" type="submit">Установить модуль</button>
+						{$queriesBtn}
+					</form>
 				</div>
-			</div>
+				<div class="queries hide">
+					<div class="content col-margin-top">
+						{$queriesTxt}
+					</div>
+				</div>
 HTML;
+		} else {
+			// Иначе показываем текст, что дополнительные действия не требуются
+			$output .= <<<HTML
+				<div class="alert alert-info">
+					<p class="mt0">Дополнительные действия по установке модуля не требуются.</p>
+					{$dontForgetToDeleteInstaller} после выполнения инструкции.
+				</div>
+HTML;
+		}
 	}
 
 	if ($_POST['accept'] && $_POST['install']) {
 		$installedMessages = [];
 
-		if (count($queries)) {
+		if (is_array($queries) && count($queries)) {
 			/** @var array $queries */
 			foreach ($queries as $queryItem) {
 				$installer->db->query($queryItem);
@@ -205,7 +218,7 @@ HTML;
 				{$installedMessagesText}
 			</ul>
 
-			Не забудьте удалить с сервера файл <b>dle_module_install.php</b> и папку <b>dle_starter_installer</b>
+			{$dontForgetToDeleteInstaller}
  		</div>
 
 HTML;
