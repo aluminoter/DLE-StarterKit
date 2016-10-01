@@ -123,7 +123,7 @@ HTML;
 					}
 				}
 
-				$stepElementString = '<li class="col-margin-bottom" data-step-text="' . ($key + 1) . '">' . implode($stepElement) . '</li>';
+				$stepElementString = '<li class="li-steps col-margin-bottom" data-step-text="' . ($key + 1) . '">' . implode($stepElement) . '</li>';
 
 				$output .= $stepElementString;
 			}
